@@ -1,16 +1,19 @@
-import getpass
 import os
 import datetime
 import traceback
 import sys
-import subprocess
 
 import colorama
-from colorama import Fore, Back, Style
+from colorama import Fore
 colorama.init()
 
+#felt silly
+def restart_thing():
+    print(Fore.RESET)
+    print('Restarting...\n')
+    exec(open('main.py').read())
+
 def commandLine(command):
-         
     #closes the cmd
     if command == '!EXIT' or command == '!E':
         print('\nExiting...')
@@ -18,22 +21,40 @@ def commandLine(command):
     
     #restarts the program
     elif command == '!RESTART' or command == '!R':
-        print('\nRestarting...\n')
-        exec(open('Main.py').read())
+        restart_thing()
+    
+    #refresh thing
+    elif command == '!REFRESH':
+        if os.name == 'nt':
+            os.system('cls')
+            exec(open('main.py').read())
         
     #help command
     elif command == '!HELP' or command == '!H':
-         print('\nHere the commands you can use:\n' + 
-              '"!EXIT" Or "!E" = "Exits the OS"\n' + 
-              '"!HELP" Or "!H" = "Gives you info on what you can do"\n' + 
-              '"!PATH" Or "!P" = "Shows the directory you are in"\n' + 
-              '"!LIST" Or "!L" = "Shows a list of files in the directory you are in"\n' + 
-              '"!TEXT" Or "!T" = "Reads a text file"\n' + 
-              '"!CD" = "Go to a directory"\n')
+         print(Fore.LIGHTYELLOW_EX + '\n Here the commands you can use:\n' + 
+              '\n "!EXIT" Or "!E" = "Exits YYOS"\n\n' + 
+              ' "!HELP" Or "!H" = "Gives you info on what you can do"\n\n' + 
+              ' "!PATH" Or "!P" = "Shows the directory you are in"\n\n' + 
+              ' "!LIST" Or "!L" = "Shows a list of files in the directory you are in"\n\n' + 
+              ' "!TEXT" Or "!T" = "Reads a text file"\n\n' + 
+              ' "!CODE" Or "!C" = "Runs YY CODE"\n\n' + 
+              ' "!REFRESH" = "Clears everything"\n\n' + 
+              ' "!RESTART" Or "!R" = "Restarts YYOS"\n\n' + 
+              ' "!VERSION" Or "!V" = "Shows the version of the program"\n\n' + 
+              ' "!CD" = "Go to a directory"\n' + Fore.LIGHTMAGENTA_EX)
     
     #opens up the code prompt
     elif command == '!CODE' or command == '!C':
             codePrompt()
+    
+    #decided to make it a txt file because why not
+    elif command == '!VERSION' or command == '!V':
+        file_name = 'version.txt'
+        print()
+        with open(file_name, 'r') as file:
+            content = file.read()
+            print(content)
+        print()
         
     #shows the path you are in
     elif command == '!PATH' or command == '!P':
@@ -45,19 +66,25 @@ def commandLine(command):
          
     #reads a txt file
     elif command == '!TEXT' or command == '!T':
-        file_name = input("\nEnter the path of the text file: ")
-        with open(file_name, 'r') as file:
-            print('\n')
-            content = file.read()
-            print(content)
+        file_name = input('\nEnter the path of the text file: ')
+        file_name = file_name.replace('/', '\\')  # dumb ass shit
+        try:
+            with open(file_name, 'r') as file:
+                print()
+                content = file.read()
+                print(content)
+        except FileNotFoundError:
+            print(f'\nDirectory not found: {file_name}')
+        print()
         
     #go to a directory
     elif command.startswith('!CD'):
-        path = command.split(' ', 1)
+        new_dir = input('\nEnter the path of the directory: ')
         try:
-            os.chdir(path)
+            os.chdir(new_dir)
+            print(f"\nDirectory changed to {new_dir} successfully!\n")
         except FileNotFoundError:
-            print(f'Directory "{path}" not found.')
+            print(f"\nDirectory not found: {new_dir}\n")
             
     else:
         print(f'\nInvalid command: {command}\n')
@@ -74,36 +101,33 @@ def terminal():
             print('Saving error to crash log...\n')
             save_error_log(str(e))
             
+#hhh i am such a silly willy
 def codeLine(prompt):
+    if prompt == 'YY "restart_program"':
+        restart_thing()
+        
     if prompt == 'YY "restart"':
         print(Fore.RESET)
-        print('\nRestarting...\n')
-        exec(open('Main.py').read())
+        print('   Restarting...')
+        print(Fore.LIGHTCYAN_EX, end='')
+        codePrompt()
         
     elif prompt == 'YY "intro"':
-        print('\n   Hello, welcome to YYOS!\n')
-    
-    elif prompt == 'YY "version"':
-        file_name = 'version.txt'
-        with open(file_name, 'r') as file:
-            content = file.read()
-            print(content)
+        print('\n     Hello, welcome to YY code!\n')
 
-# do this thing later
     elif prompt == 'YY "help"':
-         print('\n   Here is a list that shows what you can do!:\n' + 
-              '\n' + 
-              '\n' + 
-              '\n' + 
-              '\n' + 
-              '\n' + 
-              '\n')
+         print('\n     Here is a list that shows what you can do!:\n' + 
+              '\n     YY "restart_program" = restarts the whole program\n' + 
+              '     YY "restart" = restarts\n' + 
+              '     YY "intro" = does the intro\n')
         
     else:
-        print(f'\n   Invalid command: {prompt}\n')
+        print(f'\n     Invalid code: {prompt}\n')
             
 def codePrompt():
-    print(Fore.LIGHTCYAN_EX + Style.BRIGHT + '\n   Type in some code:\n')
+    print(Fore.LIGHTCYAN_EX + '\n   WELCOME TO YY CODE!')
+    print('   Do YY "help" to see what you can do!')
+    print('\n   Type in some code:\n')
     while True:
         try:
             prompt = input('   < ')
@@ -132,7 +156,7 @@ def save_error_log(error_message):
         file.write(f'Error: {error_message}\n\n')
         file.write('Traceback:\n')
         for traceback_line in traceback_details:
-            file.write(f"File 'Prompt.py', line {traceback_line.lineno}, in {traceback_line.name}\n")
+            file.write(f"File 'prompt.py', line {traceback_line.lineno}, in {traceback_line.name}\n")
             file.write(f'    {traceback_line.line}\n')
             file.write('Make sure to report this bug on: https://github.com/YY0100/YYOS')
         file.write('\n')

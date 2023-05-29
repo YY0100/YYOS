@@ -34,7 +34,7 @@ MANIFEST
 
 # My shit
 TODO
-crash/
+src/crash/
 
 # Installer logs
 pip-log.txt
